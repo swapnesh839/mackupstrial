@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { FaceMesh } from '@mediapipe/face_mesh';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-// import * as tf from '@tensorflow/tfjs';
-import { Camera } from '@mediapipe/camera_utils';  
+import { Camera } from '@mediapipe/camera_utils';
+import * as FACEMESH from '@mediapipe/face_mesh/face_mesh';
 
 const MediaPipeComponent = () => {
   const videoRef = useRef(null);
@@ -16,8 +16,9 @@ const MediaPipeComponent = () => {
       canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
       if (results.multiFaceLandmarks) {
         for (const landmarks of results.multiFaceLandmarks) {
-          drawConnectors(canvasCtx, landmarks, FaceMesh.FACEMESH_LIPS, { color: '#FF3030', lineWidth: 1 });
-          drawLandmarks(canvasCtx, landmarks, { color: '#FF3030', lineWidth: 1 });
+          // Draw only the lips
+          drawConnectors(canvasCtx, landmarks, FACEMESH.FACEMESH_LIPS, { color: '#FF3030', lineWidth: 1 });
+          drawLandmarks(canvasCtx, landmarks.filter((_, index) => FACEMESH.FACEMESH_LIPS.flat().includes(index)), { color: '#FF3030', lineWidth: 1 });
         }
       }
       canvasCtx.restore();
