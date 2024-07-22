@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { FaceMesh } from '@mediapipe/face_mesh';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { Camera } from '@mediapipe/camera_utils';
-import * as FACEMESH from '@mediapipe/face_mesh/face_mesh';
+import { FACEMESH_LIPS } from '@mediapipe/face_mesh';
 
 const MediaPipeComponent = () => {
   const videoRef = useRef(null);
@@ -17,8 +17,10 @@ const MediaPipeComponent = () => {
       if (results.multiFaceLandmarks) {
         for (const landmarks of results.multiFaceLandmarks) {
           // Draw only the lips
-          drawConnectors(canvasCtx, landmarks, FACEMESH.FACEMESH_LIPS, { color: '#FF3030', lineWidth: 1 });
-          drawLandmarks(canvasCtx, landmarks.filter((_, index) => FACEMESH.FACEMESH_LIPS.flat().includes(index)), { color: '#FF3030', lineWidth: 1 });
+          drawConnectors(canvasCtx, landmarks, FACEMESH_LIPS, { color: '#FF3030', lineWidth: 1 });
+          const lipLandmarks = FACEMESH_LIPS.flat();
+          const lipPoints = lipLandmarks.map(index => landmarks[index]);
+          drawLandmarks(canvasCtx, lipPoints, { color: '#FF3030', lineWidth: 1 });
         }
       }
       canvasCtx.restore();
@@ -45,6 +47,17 @@ const MediaPipeComponent = () => {
     });
     camera.start();
 
+    // Handle WebGL context loss
+    const canvasElement = canvasRef.current;
+    canvasElement.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault();
+      // Handle the context loss, possibly by reinitializing WebGL
+    });
+
+    canvasElement.addEventListener('webglcontextrestored', () => {
+      // Reinitialize WebGL resources
+    });
+
     return () => {
       faceMesh.close();
       camera.stop();
@@ -53,7 +66,7 @@ const MediaPipeComponent = () => {
 
   return (
     <div>
-      <video ref={videoRef} style={{ display: 'none' }}></video>
+      <video ref={videoRef} style={{ display: 'none' }} playsInline></video>
       <canvas ref={canvasRef} width="640" height="480"></canvas>
     </div>
   );
