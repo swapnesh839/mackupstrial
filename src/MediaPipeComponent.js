@@ -1,3 +1,4 @@
+// src/MediaPipeComponent.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { FaceMesh } from '@mediapipe/face_mesh';
 import { Camera } from '@mediapipe/camera_utils';
@@ -84,12 +85,14 @@ const MediaPipeComponent = () => {
     return () => {
       if (faceMeshRef.current) {
         faceMeshRef.current.close();
+        faceMeshRef.current = null;
       }
       if (cameraRef.current) {
         cameraRef.current.stop();
+        cameraRef.current = null;
       }
     };
-  }, [lipColor]);
+  }, []);
 
   useEffect(() => {
     if (faceMeshRef.current) {
