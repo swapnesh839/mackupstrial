@@ -10,49 +10,49 @@ const MediaPipeComponent = () => {
   const faceMeshRef = useRef(null);
   const cameraRef = useRef(null);
 
-  useEffect(() => {
-    const onResults = (results) => {
-      const canvasCtx = canvasRef.current.getContext('2d');
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
-      if (results.multiFaceLandmarks) {
-        for (const landmarks of results.multiFaceLandmarks) {
-          const lipOuterLandmarks = FACEMESH_LIPS.slice(0, 20).flat(); // Outer lip landmarks
-          const lipInnerLandmarks = FACEMESH_LIPS.slice(20).flat();    // Inner lip landmarks
+  const onResults = (results) => {
+    const canvasCtx = canvasRef.current.getContext('2d');
+    canvasCtx.save();
+    canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
+    if (results.multiFaceLandmarks) {
+      for (const landmarks of results.multiFaceLandmarks) {
+        const lipOuterLandmarks = FACEMESH_LIPS.slice(0, 20).flat(); // Outer lip landmarks
+        const lipInnerLandmarks = FACEMESH_LIPS.slice(20).flat();    // Inner lip landmarks
 
-          const lipOuterPoints = lipOuterLandmarks.map(index => ({
-            x: landmarks[index].x * canvasRef.current.width,
-            y: landmarks[index].y * canvasRef.current.height
-          }));
+        const lipOuterPoints = lipOuterLandmarks.map(index => ({
+          x: landmarks[index].x * canvasRef.current.width,
+          y: landmarks[index].y * canvasRef.current.height
+        }));
 
-          const lipInnerPoints = lipInnerLandmarks.map(index => ({
-            x: landmarks[index].x * canvasRef.current.width,
-            y: landmarks[index].y * canvasRef.current.height
-          }));
+        const lipInnerPoints = lipInnerLandmarks.map(index => ({
+          x: landmarks[index].x * canvasRef.current.width,
+          y: landmarks[index].y * canvasRef.current.height
+        }));
 
-          // Draw outer lips
-          canvasCtx.beginPath();
-          canvasCtx.moveTo(lipOuterPoints[0].x, lipOuterPoints[0].y);
-          lipOuterPoints.forEach(point => {
-            canvasCtx.lineTo(point.x, point.y);
-          });
-          canvasCtx.closePath();
+        // Draw outer lips
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(lipOuterPoints[0].x, lipOuterPoints[0].y);
+        lipOuterPoints.forEach(point => {
+          canvasCtx.lineTo(point.x, point.y);
+        });
+        canvasCtx.closePath();
 
-          // Draw inner lips
-          canvasCtx.moveTo(lipInnerPoints[0].x, lipInnerPoints[0].y);
-          lipInnerPoints.forEach(point => {
-            canvasCtx.lineTo(point.x, point.y);
-          });
-          canvasCtx.closePath();
+        // Draw inner lips
+        canvasCtx.moveTo(lipInnerPoints[0].x, lipInnerPoints[0].y);
+        lipInnerPoints.forEach(point => {
+          canvasCtx.lineTo(point.x, point.y);
+        });
+        canvasCtx.closePath();
 
-          canvasCtx.fillStyle = lipColor;
-          canvasCtx.fill('evenodd'); // Use 'evenodd' rule to properly handle inner and outer paths
-        }
+        canvasCtx.fillStyle = lipColor;
+        canvasCtx.fill('evenodd'); // Use 'evenodd' rule to properly handle inner and outer paths
       }
-      canvasCtx.restore();
-    };
+    }
+    canvasCtx.restore();
+  };
 
+  useEffect(() => {
     const initializeFaceMesh = async () => {
       const faceMesh = new FaceMesh({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
@@ -91,50 +91,9 @@ const MediaPipeComponent = () => {
     };
   }, []);
 
-  // Ensure that changing the lip color does not reinitialize FaceMesh
   useEffect(() => {
     if (faceMeshRef.current) {
-      faceMeshRef.current.onResults((results) => {
-        const canvasCtx = canvasRef.current.getContext('2d');
-        canvasCtx.save();
-        canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-        canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
-        if (results.multiFaceLandmarks) {
-          for (const landmarks of results.multiFaceLandmarks) {
-            const lipOuterLandmarks = FACEMESH_LIPS.slice(0, 20).flat(); // Outer lip landmarks
-            const lipInnerLandmarks = FACEMESH_LIPS.slice(20).flat();    // Inner lip landmarks
-
-            const lipOuterPoints = lipOuterLandmarks.map(index => ({
-              x: landmarks[index].x * canvasRef.current.width,
-              y: landmarks[index].y * canvasRef.current.height
-            }));
-
-            const lipInnerPoints = lipInnerLandmarks.map(index => ({
-              x: landmarks[index].x * canvasRef.current.width,
-              y: landmarks[index].y * canvasRef.current.height
-            }));
-
-            // Draw outer lips
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(lipOuterPoints[0].x, lipOuterPoints[0].y);
-            lipOuterPoints.forEach(point => {
-              canvasCtx.lineTo(point.x, point.y);
-            });
-            canvasCtx.closePath();
-
-            // Draw inner lips
-            canvasCtx.moveTo(lipInnerPoints[0].x, lipInnerPoints[0].y);
-            lipInnerPoints.forEach(point => {
-              canvasCtx.lineTo(point.x, point.y);
-            });
-            canvasCtx.closePath();
-
-            canvasCtx.fillStyle = lipColor;
-            canvasCtx.fill('evenodd'); // Use 'evenodd' rule to properly handle inner and outer paths
-          }
-        }
-        canvasCtx.restore();
-      });
+      faceMeshRef.current.onResults(onResults);
     }
   }, [lipColor]);
 
