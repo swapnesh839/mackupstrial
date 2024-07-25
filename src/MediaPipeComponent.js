@@ -89,7 +89,7 @@ const MediaPipeComponent = () => {
         cameraRef.current.stop();
       }
     };
-  }, []);
+  }, [lipColor]);
 
   useEffect(() => {
     if (faceMeshRef.current) {
