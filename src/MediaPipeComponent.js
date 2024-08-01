@@ -101,13 +101,13 @@ const MediaPipeComponent = ({ isRendering = false }) => {
         cameraRef.current = null;
       }
     };
-  }, [isRendering]);
+  }, [isRendering,onResults]);
 
   useEffect(() => {
     if (faceMeshRef.current && isRendering) {
       faceMeshRef.current.onResults(onResults);
     }
-  }, [lipColor, isRendering]);
+  }, [lipColor, isRendering,onResults]);
 
   return (
     <div className="d-flex w-100">
