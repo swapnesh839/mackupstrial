@@ -6,7 +6,7 @@ const App = () => {
   const [isRendering, setIsRendering] = React.useState(false)
   return (
     <div className='container-fluid h-100 text-white'>
-      <img width={130} className='position-absolute top-0 start-0 m-1' src={logo} />
+      <img alt='logo' width={130} className='position-absolute top-0 start-0 m-1' src={logo} />
       <div className="row h-100">
       <div className='col col-md-6 col-12 h-100'>
           <div className='d-flex flex-column justify-content-center align-content-center h-100'>
