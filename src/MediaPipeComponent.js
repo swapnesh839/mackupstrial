@@ -5,9 +5,9 @@ import { Camera } from '@mediapipe/camera_utils';
 import { FACEMESH_LIPS } from '@mediapipe/face_mesh';
 import { SquarePlay } from 'lucide-react';
 
-const MediaPipeComponent = ({ isRendering =false}) => {
-  useEffect(()=>{
-    
+const MediaPipeComponent = ({ isRendering = false }) => {
+  useEffect(() => {
+
   }, [isRendering]);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -70,24 +70,26 @@ const MediaPipeComponent = ({ isRendering =false}) => {
           minTrackingConfidence: 0.5
         });
         faceMesh.onResults(onResults);
-  
+
         const videoElement = videoRef.current;
         const camera = new Camera(videoElement, {
           onFrame: async () => {
-            await faceMesh.send({ image: videoElement });
+            if (isRendering && faceMeshRef.current) {
+              await faceMesh.send({ image: videoElement });
+            }
           },
           width: 640,
           height: 480
         });
         camera.start();
-  
+
         faceMeshRef.current = faceMesh;
         cameraRef.current = camera;
       };
-  
+
       initializeFaceMesh();
     }
-    
+
 
     return () => {
       if (faceMeshRef.current) {
@@ -105,7 +107,7 @@ const MediaPipeComponent = ({ isRendering =false}) => {
     if (faceMeshRef.current && isRendering) {
       faceMeshRef.current.onResults(onResults);
     }
-  }, [lipColor,isRendering]);
+  }, [lipColor, isRendering]);
 
   return (
     <div className="d-flex w-100">
@@ -122,12 +124,12 @@ const MediaPipeComponent = ({ isRendering =false}) => {
         </>
       ) : (
         <div style={{ height: '500px', width: '320px' }} className='m-auto bg-dark-subtle d-flex'>
-          <SquarePlay  className='m-auto text-dark fs-2'/>
+          <SquarePlay className='m-auto text-dark fs-2' />
         </div>
       )}
     </div>
   );
-  
+
 };
 
 export default MediaPipeComponent;
