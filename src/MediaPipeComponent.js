@@ -82,8 +82,12 @@ const MediaPipeComponent = ({ isRendering = false }) => {
               }
             }
           },
-          width: 640,
-          height: 480
+          width: {
+            ideal: 720
+          },
+          height: {
+            ideal: 1280
+          }
         });
         camera.start();
 
@@ -116,10 +120,10 @@ const MediaPipeComponent = ({ isRendering = false }) => {
     <div className="d-flex w-100 position-relative">
       {isRendering ? (
         <>
-          <video height={1280} width={720} style={{ display: 'none' }} playsInline></video>
+          <video ref={videoRef} height={1280} width={720} style={{ display: 'none' }} playsInline></video>
           <div className='h-100 w-100 d-flex'>
             <canvas id="canvas" ref={canvasRef} className='m-auto rounded-1 '></canvas>
-            <div style={{zIndex:99999}} className='position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex'>
+            <div style={{ zIndex: 99999 }} className='position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex'>
               <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(255, 0, 0, 0.4)')} style={{ backgroundColor: 'red', color: 'white', padding: "14px" }}></span>
               <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(255, 192, 203, 0.4)')} style={{ backgroundColor: 'pink', color: 'white', padding: "14px" }}></span>
               <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(128, 0, 128, 0.4)')} style={{ backgroundColor: 'purple', color: 'white', padding: "14px" }}></span>
