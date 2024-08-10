@@ -116,7 +116,7 @@ const MediaPipeComponent = ({ isRendering = false }) => {
     <div className="d-flex w-100 position-relative">
       {isRendering ? (
         <>
-          <video ref={videoRef} height={500} width={320} style={{ display: 'none' }} playsInline></video>
+          <video height={1280} width={720} style={{ display: 'none' }} playsInline></video>
           <div className='h-100 w-100 d-flex'>
             <canvas id="canvas" ref={canvasRef} className='m-auto rounded-1 '></canvas>
             <div style={{zIndex:99999}} className='position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex'>
