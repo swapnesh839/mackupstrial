@@ -1,25 +1,25 @@
-// src/MediaPipeComponent.jsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { FaceMesh } from '@mediapipe/face_mesh';
 import { Camera } from '@mediapipe/camera_utils';
 import { FACEMESH_LIPS } from '@mediapipe/face_mesh';
 import { SquarePlay } from 'lucide-react';
+import "./App.css";
 
 const MediaPipeComponent = ({ isRendering = false }) => {
-  useEffect(() => {
-
-  }, [isRendering]);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const [lipColor, setLipColor] = useState('rgba(255, 48, 48, 0.5)'); // Red with 50% opacity
+  const [lipColor, setLipColor] = useState('rgba(255, 48, 48, 0.4)'); // Red with 50% opacity
   const faceMeshRef = useRef(null);
   const cameraRef = useRef(null);
 
-  const onResults = (results) => {
+  const onResults = useCallback((results) => {
+    if (!canvasRef.current || !results || !faceMeshRef.current) return;
+
     const canvasCtx = canvasRef.current.getContext('2d');
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
+
     if (results.multiFaceLandmarks) {
       for (const landmarks of results.multiFaceLandmarks) {
         const lipOuterLandmarks = FACEMESH_LIPS.slice(0, 20).flat(); // Outer lip landmarks
@@ -55,7 +55,7 @@ const MediaPipeComponent = ({ isRendering = false }) => {
       }
     }
     canvasCtx.restore();
-  };
+  }, [lipColor]);
 
   useEffect(() => {
     if (isRendering) {
@@ -74,8 +74,12 @@ const MediaPipeComponent = ({ isRendering = false }) => {
         const videoElement = videoRef.current;
         const camera = new Camera(videoElement, {
           onFrame: async () => {
-            if (isRendering && faceMeshRef.current) {
-              await faceMesh.send({ image: videoElement });
+            if (faceMeshRef.current) {
+              try {
+                await faceMesh.send({ image: videoElement });
+              } catch (error) {
+                console.warn('Error sending image to faceMesh:', error);
+              }
             }
           },
           width: 640,
@@ -90,7 +94,6 @@ const MediaPipeComponent = ({ isRendering = false }) => {
       initializeFaceMesh();
     }
 
-
     return () => {
       if (faceMeshRef.current) {
         faceMeshRef.current.close();
@@ -101,25 +104,27 @@ const MediaPipeComponent = ({ isRendering = false }) => {
         cameraRef.current = null;
       }
     };
-  }, [isRendering,onResults]);
+  }, [isRendering, onResults]);
 
   useEffect(() => {
     if (faceMeshRef.current && isRendering) {
       faceMeshRef.current.onResults(onResults);
     }
-  }, [lipColor, isRendering,onResults]);
+  }, [lipColor, isRendering, onResults]);
 
   return (
-    <div className="d-flex w-100">
+    <div className="d-flex w-100 position-relative">
       {isRendering ? (
         <>
-          <video ref={videoRef} height={500} width={320} style={{ display: 'none' }} playsInline></video>
-          <canvas ref={canvasRef} height={500} width={320} className='m-auto rounded-1'></canvas>
-          <div className='z-3 position-fixed translate-middle start-50 w-100 d-flex justify-content-center' style={{ top: '20px' }}>
-            <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(255, 0, 0, 0.5)')} style={{ backgroundColor: 'red', color: 'white', padding: "14px" }}></span>
-            <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(255, 192, 203, 0.5)')} style={{ backgroundColor: 'pink', color: 'white', padding: "14px" }}></span>
-            <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(128, 0, 128, 0.5)')} style={{ backgroundColor: 'purple', color: 'white', padding: "14px" }}></span>
-            <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(139, 0, 0, 0.5)')} style={{ backgroundColor: 'darkred', color: 'white', padding: "14px" }}></span>
+          <video height={1280} width={720} style={{ display: 'none' }} playsInline></video>
+          <div className='h-100 w-100 d-flex'>
+            <canvas id="canvas" ref={canvasRef} className='m-auto rounded-1 '></canvas>
+            <div style={{zIndex:99999}} className='position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex'>
+              <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(255, 0, 0, 0.4)')} style={{ backgroundColor: 'red', color: 'white', padding: "14px" }}></span>
+              <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(255, 192, 203, 0.4)')} style={{ backgroundColor: 'pink', color: 'white', padding: "14px" }}></span>
+              <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(128, 0, 128, 0.4)')} style={{ backgroundColor: 'purple', color: 'white', padding: "14px" }}></span>
+              <span className='ratio-1x1 mx-1 rounded-circle' onClick={() => setLipColor('rgba(139, 0, 0, 0.4)')} style={{ backgroundColor: 'darkred', color: 'white', padding: "14px" }}></span>
+            </div>
           </div>
         </>
       ) : (
@@ -129,7 +134,6 @@ const MediaPipeComponent = ({ isRendering = false }) => {
       )}
     </div>
   );
-
 };
 
 export default MediaPipeComponent;
